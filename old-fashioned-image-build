@@ -14,6 +14,8 @@ SERIES=""
 USE_CHROOT_CACHE=false
 CLEANUP=true
 IMAGE_TARGET=""
+ARCH_TARGET=""
+SUBARCH=""
 REPO_SNAPSHOT=""
 SNAP_COHORT=""
 EXTRA_PPA=""
@@ -87,6 +89,17 @@ while :; do
             IMAGE_TARGET="$IMAGE_TARGET --image-target $2"
             shift
             ;;
+        --arch-target)
+            # Specify the target architecture of the build if not native.
+            # Only works with some combinations (i.e. i386 on amd64).
+            ARCH_TARGET="$2"
+            shift
+            ;;
+        --subarch)
+            # Specify the subarch used for select builds (i.e. raspi3)
+            SUBARCH="--subarch $2"
+            shift
+            ;;
         --repo-snapshot-stamp)
             # Specify a snapshot of the apt package repo for use across
             # parallel builds
@@ -114,11 +127,12 @@ while :; do
 done
 
 case `arch` in
-    aarch64) ARCH=arm64;;
-    x86_64) ARCH=amd64;;
-    ppc64le) ARCH=ppc64el;;
+    aarch64) ARCH_HOST=arm64;;
+    x86_64) ARCH_HOST=amd64;;
+    ppc64le) ARCH_HOST=ppc64el;;
     *) echo "Unrecognized arch: $(arch)"; exit 1;;
 esac
+ARCH=${ARCH_TARGET:-$ARCH_HOST}
 
 if [ x$SERIES = "x" ] ; then
     echo "Missing required '--series' argument e.g. '--series xenial'"
@@ -236,6 +250,7 @@ fi
 time /usr/share/launchpad-buildd/bin/in-target buildlivefs \
   --backend=lxd --series=$SERIES --arch=${ARCH} $LIVEFS_NAME $HTTP_PROXY \
   --project $PROJECT $SUBPROJECT --datestamp $SERIAL --image-format $IMG_FORMAT \
+  $SUBARCH \
   $EXTRA_PPA \
   $IMAGE_TARGET $REPO_SNAPSHOT $SNAP_COHORT
 

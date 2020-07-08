@@ -43,6 +43,18 @@ sudo old-fashioned-image-build
 The images will be copied to your $HOME in a "build.output/" folder after about
 30 minutes.
 
+### Raspi builds
+
+This requires an armhf or arm64 host.
+
+```bash
+sudo -E old-fashioned-image-build \
+    --series bionic \
+    --subarch raspi3 \
+    --image-format ubuntu-image \
+    --extra-ppa canonical-kernel-team/proposed
+```
+
 ## Speeding things up a bit
 
 To speed up package lookup you can install "squid-deb-proxy" on the host, then
